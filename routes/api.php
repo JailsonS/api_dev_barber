@@ -9,7 +9,7 @@ use App\Http\Controllers\BarberController;
 
 
 Route::post('/auth/login', [AuthController::class, 'login']);
-Route::post('/auth/login', [AuthController::class, 'logout']);
+Route::post('/auth/logout', [AuthController::class, 'logout']);
 Route::post('/auth/refresh', [AuthController::class, 'refresh']);
 
 Route::post('/user', [AuthController::class, 'create']);
