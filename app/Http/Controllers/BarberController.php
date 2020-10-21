@@ -24,22 +24,20 @@ class BarberController extends Controller
 
     public function createRandom()
     {
-        $array = ['error' => ''];
 
-        for($i=0; $i<15; $i++) {
+        $array = ['error'=>''];
 
-            $names = ['Paulo', 'Pedro',' João',' Rafaela','Rebecca', 'Juliana', 'Luiz', 'Maria'];
-            $lastnames = ['Monteiro', 'Cavalcante',' Souza',' Soares','Pimental', 'Pinto', 'Shenaider', 'Poll'];
-
-            $services = ['Corte','Pintura','Aparação','Enfeite'];
-            $services2 = ['Cabelo','Unha','Pernas','Sombracelhas'];
-
-            $depositions = [
-                "Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old.",
-                "Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old.",
-                "Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old.",
-                "Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old.",
-                "Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old.",
+        for($q=0; $q<15; $q++) {
+            $names = ['Boniek', 'Paulo', 'Pedro', 'Amanda', 'Leticia', 'Gabriel', 'Gabriela', 'Thais', 'Luiz', 'Diogo', 'José', 'Jeremias', 'Francisco', 'Dirce', 'Marcelo' ];
+            $lastnames = ['Santos', 'Silva', 'Santos', 'Silva', 'Alvaro', 'Sousa', 'Diniz', 'Josefa', 'Luiz', 'Diogo', 'Limoeiro', 'Santos', 'Limiro', 'Nazare', 'Mimoza' ];
+            $servicos = ['Corte', 'Pintura', 'Aparação', 'Unha', 'Progressiva', 'Limpeza de Pele', 'Corte Feminino'];
+            $servicos2 = ['Cabelo', 'Unha', 'Pernas', 'Pernas', 'Progressiva', 'Limpeza de Pele', 'Corte Feminino'];
+            $depos = [
+                'Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptate consequatur tenetur facere voluptatibus iusto accusantium vero sunt, itaque nisi esse ad temporibus a rerum aperiam cum quaerat quae quasi unde.',
+                'Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptate consequatur tenetur facere voluptatibus iusto accusantium vero sunt, itaque nisi esse ad temporibus a rerum aperiam cum quaerat quae quasi unde.',
+                'Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptate consequatur tenetur facere voluptatibus iusto accusantium vero sunt, itaque nisi esse ad temporibus a rerum aperiam cum quaerat quae quasi unde.',
+                'Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptate consequatur tenetur facere voluptatibus iusto accusantium vero sunt, itaque nisi esse ad temporibus a rerum aperiam cum quaerat quae quasi unde.',
+                'Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptate consequatur tenetur facere voluptatibus iusto accusantium vero sunt, itaque nisi esse ad temporibus a rerum aperiam cum quaerat quae quasi unde.'
             ];
 
             $newBarber = new Barber();
@@ -47,46 +45,42 @@ class BarberController extends Controller
             $newBarber->avatar = rand(1, 4).'.png';
             $newBarber->stars = rand(2, 4).'.'.rand(0, 9);
             $newBarber->lat = '-23.5'.rand(0, 9).'30907';
-            $newBarber->long = '-46.6'.rand(0, 9).'82795';
+            $newBarber->long = '-46.6'.rand(0,9).'82759';
             $newBarber->save();
 
-            $ns = rand(3,6);
+            $ns = rand(3, 6);
 
-            for($f=0; $f<4; $f++){
+            for($w=0;$w<4;$w++) {
                 $newBarberPhoto = new BarbersPhoto();
                 $newBarberPhoto->id_barber = $newBarber->id;
                 $newBarberPhoto->url = rand(1, 5).'.png';
                 $newBarberPhoto->save();
             }
-
-            for($s=1; $s<$ns; $s++){
+            for($w=0;$w<$ns;$w++) {
                 $newBarberService = new BarbersService();
                 $newBarberService->id_barber = $newBarber->id;
-                $newBarberService->name = $services[rand(0, count($services)-1)].' de '.$services2[rand(0, count($services2)-1)];
+                $newBarberService->name = $servicos[rand(0, count($servicos)-1)].' de '.$servicos2[rand(0, count($servicos2)-1)];
                 $newBarberService->price = rand(1, 99).'.'.rand(0, 100);
                 $newBarberService->save();
             }
-
-            for($t=1; $t<3; $t++){
+            for($w=0;$w<3;$w++) {
                 $newBarberTestimonial = new BarbersTestimonial();
                 $newBarberTestimonial->id_barber = $newBarber->id;
-                $newBarberTestimonial->name = $names[rand(0, count($names)-1)].' '.$lastnames[rand(0, count($lastnames)-1)];
+                $newBarberTestimonial->name = $names[rand(0, count($names)-1)];
                 $newBarberTestimonial->rate = rand(2, 4).'.'.rand(0, 9);
-                $newBarberTestimonial->body = $depositions[rand(0, count($depositions)-1)];
+                $newBarberTestimonial->body = $depos[rand(0, count($depos)-1)];
                 $newBarberTestimonial->save();
             }
-
-            for($e=0; $e<4; $e++){
+            for($e=0;$e<4;$e++){
                 $rAdd = rand(7, 10);
                 $hours = [];
-                for($r=0; $e<8; $r++) {
+                for($r=0;$r<8;$r++) {
                     $time = $r + $rAdd;
                     if($time < 10) {
                         $time = '0'.$time;
                     }
                     $hours[] = $time.':00';
                 }
-
                 $newBarberAvail = new BarbersAvailability();
                 $newBarberAvail->id_barber = $newBarber->id;
                 $newBarberAvail->weekday = $e;
