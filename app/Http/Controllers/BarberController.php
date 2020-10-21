@@ -22,6 +22,7 @@ class BarberController extends Controller
         $this->loggedUser = auth()->user();
     }
 
+    /*
     public function createRandom()
     {
 
@@ -91,4 +92,23 @@ class BarberController extends Controller
 
         return $array;
     }
+    */
+
+    public function list(Request $request)
+    {
+        $array = ['error'=>''];
+
+        $barbers = Barber::all();
+
+        foreach ($barbers as $key => $value) {
+            $barbers[$key]['avatar'] = url('media/avatars/'.$barbers[$key]['avatar']);
+        }
+
+        $array['data'] = $barbers;
+        $array['loc'] = 'São Paulo';
+
+        return $array;
+    }
+
+
 }
