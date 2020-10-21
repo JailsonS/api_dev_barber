@@ -94,11 +94,71 @@ class BarberController extends Controller
     }
     */
 
+    private function getGeolocation($address)
+    {
+        # transform into urlencode
+        $address = urlencode($address);
+
+        # build url with params
+        $key = env('MAPS_KEY', null);
+        $url = 'https://maps.googleapis.com/maps/api/geocode/json?address='.$address.'&key='.$key;
+
+        # initialize CURL
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); # to get the response
+
+        # execute curl
+        $response = curl_exec($ch);
+        curl_close($ch);
+
+        return json_decode($response, true);
+    }
+
     public function list(Request $request)
     {
         $array = ['error'=>''];
 
-        $barbers = Barber::all();
+        # get info from request
+        $lat = $request->input('lat');
+        $lng = $request->input('lng');
+        $city = $request->input('city');
+        $offset = $request->input('offset');
+        $offset ?? 0;
+
+        # check if city is not empty
+        if(!empty($city) > 0){
+            $res = $this->getGeolocation($city);
+            # check results
+            if(count($res['results'])){
+                $lat = $res['results'][0]['geometry']['location']['lat'];
+                $lng = $res['results'][0]['geometry']['location']['lng'];
+            }
+        # check if lat lng are not empty
+        } elseif (!empty($lat) && !empty($lng)) {
+            $res = $this->getGeolocation($lat.','.$lng);
+            # check results
+            if(count($res['results'])){
+                $city = $res['results'][0]['formatted_address'];
+            }
+        } else {
+            $lat = '-23.5630907';
+            $lng = '-45.6682795';
+            $city = 'São Paulo';
+        }
+
+        # script to compute distance
+        $scriptDistance = 'SQRT(
+            POW(69.1 * (cast(lat as float) - '.$lat.'), 2) +
+            POW(69.1 * ('.$lng.' - cast(long as float)) * COS(cast(lat as float) * 57.3), 2))';
+        
+        # make query
+        $barbers = Barber::select(Barber::raw('*, '.$scriptDistance.' as distance'))
+            ->WhereRaw ($scriptDistance.' < ?', [100])
+            ->orderBy('distance', 'ASC') // order
+            ->offset($offset)
+            ->limit(5)
+            ->get();
 
         foreach ($barbers as $key => $value) {
             $barbers[$key]['avatar'] = url('media/avatars/'.$barbers[$key]['avatar']);
