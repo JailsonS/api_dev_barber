@@ -124,7 +124,7 @@ class BarberController extends Controller
         $lng = $request->input('lng');
         $city = $request->input('city');
         $offset = $request->input('offset');
-        $offset ?? 0;
+        $offset ?? 0; // if inline
 
         # check if city is not empty
         if(!empty($city) > 0){
@@ -159,7 +159,8 @@ class BarberController extends Controller
             ->offset($offset)
             ->limit(5)
             ->get();
-
+        
+        # fix the avatar's url
         foreach ($barbers as $key => $value) {
             $barbers[$key]['avatar'] = url('media/avatars/'.$barbers[$key]['avatar']);
         }
@@ -168,6 +169,11 @@ class BarberController extends Controller
         $array['loc'] = 'São Paulo';
 
         return $array;
+    }
+
+    public function one()
+    {
+
     }
 
 
