@@ -25,13 +25,13 @@ class CreateAllTables extends Migration
             $table->id();
             $table->integer('id_user');
             $table->integer('id_barber');
-            $table->datetime('ap_datetime');
         });
 
         Schema::create('userappointments', function (Blueprint $table) {
             $table->id();
             $table->integer('id_user');
             $table->integer('id_barber');
+            $table->datetime('ap_datetime');
         });
 
         Schema::create('barbers', function (Blueprint $table) {
@@ -95,4 +95,5 @@ class CreateAllTables extends Migration
         Schema::dropIfExists('barberstestimonials');
         Schema::dropIfExists('barbersavailabilities');
     }
+
 }

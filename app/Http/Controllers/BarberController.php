@@ -6,11 +6,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 use App\Models\User;
+use App\Models\UserAppointment;
 use App\Models\Barber;
 use App\Models\BarbersPhoto;
 use App\Models\BarbersService;
 use App\Models\BarbersAvailability;
 use App\Models\BarbersTestimonial;
+
 
 class BarberController extends Controller
 {
@@ -171,9 +173,95 @@ class BarberController extends Controller
         return $array;
     }
 
-    public function one()
-    {
+    public function one($id)
+    {   
+        $array = ['error' => ''];
 
+        $barber = Barber::find($id);
+
+        if($barber){
+            $barber['avatar'] = url('media/avatars/'.$barber['avatar']);
+            $barber['favorited'] = false;
+            $barber['photos'] = [];
+            $barber['services'] = [];
+            $barber['testimonials'] = [];
+            $barber['available'] = [];
+
+            # get baber's photos
+            $barber['photos'] = BarbersPhoto::select(['id', 'url'])->where('id_barber', $barber->id)->get();
+            foreach ($barber['photos'] as $key => $value) {
+                $barber['photos'][$key]['url'] = url('media/uploads/'.$barber['photos'][$key]['url']);
+            }
+
+            # get barber's service
+            $barber['services'] = BarbersService::select(['id','name','price'])
+                ->where('id_barber', $barber->id)
+                ->get();
+
+            # get barber's testimonials
+            $barber['testimonials'] = BarbersTestimonial::select(['id','name','rate', 'body'])
+                ->where('id_barber', $barber->id)
+                ->get();
+
+
+            # get barber's availability
+            $availability = [];
+
+            // 1. get initial availability
+            $avails = BarbersAvailability::where('id_barber', $barber->id)->get();
+            $availWeekDays = [];
+            foreach ($avails as $item) {
+                $availWeekDays[$item['weekday']] = explode(',', $item['hours']);
+            }
+
+            // 2. get next 20 days appointments
+            $appointments = [];
+            $appQuery = UserAppointment::where('id_barber', $barber->id)
+                ->whereBetween('ap_datetime', [
+                    date('Y-m-d').' 00:00:00',
+                    date('Y-m-d', strtotime('+20 days')).' 23:59:59',
+                ])->get();
+
+            foreach($appQuery as $appItem){
+                $appointments[] = $appItem['ap_datetime'];
+            }
+
+            // 3. get final availability
+            for($i=0;$i<20;$i++){
+                $timeItem = strtotime('+'.$i.' days');
+                $weekday = date('w', $timeItem);
+
+                // check day of week in avails
+                if( in_array($weekday, array_keys($availWeekDays)) ){
+                    $hours = []; // hour avails
+                    $dayItem = date('Y-m-d', $timeItem);
+
+                    // for each week day, check every hour
+                    foreach ($availWeekDays[$weekday] as $hourItem) {
+                        $dayFormatted = $dayItem.' '.$hourItem.':00';
+                        if(!in_array($dayFormatted, $appointments)){
+                            $hours[] = $hourItem;
+                        }
+                    }
+
+                    if(count($hours) > 0) {
+                        $availability[] = [
+                            'date' => $dayItem,
+                            'hours' => $hours
+                        ];
+                    }
+                }
+            }
+
+            $barber['available'] = $availability;
+            $array['data'] = $barber;
+
+        } else {
+            $array['error'] = 'Barbeiro não cadastrado!';
+            return $array;
+        }
+
+        return $array;
     }
 
 
