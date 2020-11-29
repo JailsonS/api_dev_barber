@@ -243,7 +243,6 @@ class BarberController extends Controller
             $barber['testimonials'] = [];
             $barber['available'] = [];
 
-
             # get favorites
             $cFavorite = UserFavorite::where('id_user', $this->loggedUser->id)
                 ->where('id_barber', $barber->id)

@@ -31,6 +31,7 @@ class CreateAllTables extends Migration
             $table->id();
             $table->integer('id_user');
             $table->integer('id_barber');
+            $table->integer('id_service');
             $table->datetime('ap_datetime');
         });
 
