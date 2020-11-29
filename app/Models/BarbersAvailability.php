@@ -9,7 +9,7 @@ class BarbersAvailability extends Model
 {
     use HasFactory;
 
-    protected $table = 'barbersavailability';
+    protected $table = 'barbersavailabilities';
     public $timestamps = false;
 }
 

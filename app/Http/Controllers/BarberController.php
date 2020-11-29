@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 
 use App\Models\User;
 use App\Models\UserAppointment;
+use App\Models\UserFavorite;
 use App\Models\Barber;
 use App\Models\BarbersPhoto;
 use App\Models\BarbersService;
@@ -24,7 +25,7 @@ class BarberController extends Controller
         $this->loggedUser = auth()->user();
     }
 
-    /*
+    
     public function createRandom()
     {
 
@@ -94,7 +95,6 @@ class BarberController extends Controller
 
         return $array;
     }
-    */
 
     private function getGeolocation($address)
     {
@@ -115,6 +115,60 @@ class BarberController extends Controller
         curl_close($ch);
 
         return json_decode($response, true);
+    }
+
+    private function getAvailibility($barber)
+    {
+        # get barber's availability
+        $availability = [];
+
+        // 1. get initial availability
+        $avails = BarbersAvailability::where('id_barber', $barber->id)->get();
+        $availWeekDays = [];
+        foreach ($avails as $item) {
+            $availWeekDays[$item['weekday']] = explode(',', $item['hours']);
+        }
+
+        // 2. get next 20 days appointments
+        $appointments = [];
+        $appQuery = UserAppointment::where('id_barber', $barber->id)
+            ->whereBetween('ap_datetime', [
+                date('Y-m-d').' 00:00:00',
+                date('Y-m-d', strtotime('+20 days')).' 23:59:59',
+            ])->get();
+
+        foreach($appQuery as $appItem){
+            $appointments[] = $appItem['ap_datetime'];
+        }
+
+        // 3. get final availability
+        for($i=0;$i<20;$i++){
+            $timeItem = strtotime('+'.$i.' days');
+            $weekday = date('w', $timeItem);
+
+            // check day of week in avails
+            if( in_array($weekday, array_keys($availWeekDays)) ){
+                $hours = []; // hour avails
+                $dayItem = date('Y-m-d', $timeItem);
+
+                // for each week day, check every hour
+                foreach ($availWeekDays[$weekday] as $hourItem) {
+                    $dayFormatted = $dayItem.' '.$hourItem.':00';
+                    if(!in_array($dayFormatted, $appointments)){
+                        $hours[] = $hourItem;
+                    }
+                }
+
+                if(count($hours) > 0) {
+                    $availability[] = [
+                        'date' => $dayItem,
+                        'hours' => $hours
+                    ];
+                }
+            }
+        }
+
+        return $availability;
     }
 
     public function list(Request $request)
@@ -180,12 +234,21 @@ class BarberController extends Controller
         $barber = Barber::find($id);
 
         if($barber){
+
+            # set values
             $barber['avatar'] = url('media/avatars/'.$barber['avatar']);
             $barber['favorited'] = false;
             $barber['photos'] = [];
             $barber['services'] = [];
             $barber['testimonials'] = [];
             $barber['available'] = [];
+
+
+            # get favorites
+            $cFavorite = UserFavorite::where('id_user', $this->loggedUser->id)
+                ->where('id_barber', $barber->id)
+                ->count();
+            $barber['favorited'] = ($cFavorite > 0) ? true : false;
 
             # get baber's photos
             $barber['photos'] = BarbersPhoto::select(['id', 'url'])->where('id_barber', $barber->id)->get();
@@ -203,55 +266,9 @@ class BarberController extends Controller
                 ->where('id_barber', $barber->id)
                 ->get();
 
-
-            # get barber's availability
-            $availability = [];
-
-            // 1. get initial availability
-            $avails = BarbersAvailability::where('id_barber', $barber->id)->get();
-            $availWeekDays = [];
-            foreach ($avails as $item) {
-                $availWeekDays[$item['weekday']] = explode(',', $item['hours']);
-            }
-
-            // 2. get next 20 days appointments
-            $appointments = [];
-            $appQuery = UserAppointment::where('id_barber', $barber->id)
-                ->whereBetween('ap_datetime', [
-                    date('Y-m-d').' 00:00:00',
-                    date('Y-m-d', strtotime('+20 days')).' 23:59:59',
-                ])->get();
-
-            foreach($appQuery as $appItem){
-                $appointments[] = $appItem['ap_datetime'];
-            }
-
-            // 3. get final availability
-            for($i=0;$i<20;$i++){
-                $timeItem = strtotime('+'.$i.' days');
-                $weekday = date('w', $timeItem);
-
-                // check day of week in avails
-                if( in_array($weekday, array_keys($availWeekDays)) ){
-                    $hours = []; // hour avails
-                    $dayItem = date('Y-m-d', $timeItem);
-
-                    // for each week day, check every hour
-                    foreach ($availWeekDays[$weekday] as $hourItem) {
-                        $dayFormatted = $dayItem.' '.$hourItem.':00';
-                        if(!in_array($dayFormatted, $appointments)){
-                            $hours[] = $hourItem;
-                        }
-                    }
-
-                    if(count($hours) > 0) {
-                        $availability[] = [
-                            'date' => $dayItem,
-                            'hours' => $hours
-                        ];
-                    }
-                }
-            }
+            # get availability
+            $availability = $this->getAvailibility($barber);
+            
 
             $barber['available'] = $availability;
             $array['data'] = $barber;
@@ -263,6 +280,4 @@ class BarberController extends Controller
 
         return $array;
     }
-
-
 }
