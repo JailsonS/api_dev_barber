@@ -10,7 +10,7 @@ use App\Http\Controllers\BarberController;
 
 Route::get('/401', [AuthController::class, 'unauthorized'])->name('login');
 
-//Route::get('/random', [BarberController::class, 'createRandom']);
+Route::get('/random', [BarberController::class, 'createRandom']);
 
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/logout', [AuthController::class, 'logout']);
@@ -20,7 +20,7 @@ Route::post('/user', [AuthController::class, 'create']);
 Route::get('/user', [UserController::class, 'read']);
 Route::put('/user', [UserController::class, 'update']);
 Route::get('/user/favorites', [UserController::class, 'getFavorites']);
-Route::post('/user/favorite', [UserController::class, 'addFavorite']);
+Route::post('/user/favorite', [UserController::class, 'toggleFavorite']);
 Route::get('/user/appointments', [UserController::class, 'getAppointments']);
 
 Route::get('/barbers', [BarberController::class, 'list']);
@@ -28,3 +28,5 @@ Route::get('/barber/{id}', [BarberController::class, 'one']);
 Route::post('/barber/{id}/appointment', [BarberController::class, 'setAppointment']);
 
 Route::get('/search', [BarberController::class, 'search']);
+
+//eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC8xMjcuMC4wLjE6ODAwMFwvYXBpXC9hdXRoXC9sb2dpbiIsImlhdCI6MTYwNjkzMzQyNiwibmJmIjoxNjA2OTMzNDI2LCJqdGkiOiJQZGNEM1VVWHlFZHM4d3NTIiwic3ViIjoxLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.7QNxhnVE_Pwpyuht1hTIRfqGHcR4M4FGKWQ8n4ywqgw

@@ -279,4 +279,96 @@ class BarberController extends Controller
 
         return $array;
     }
+
+    public function setAppointment($id, Request $request)
+    {
+        // service, year, month, day, hour
+        $array = ['error' => ''];
+
+        $service = intval($request->input('service'));
+        $year = intval($request->input('year'));
+        $month = intval($request->input('month'));
+        $day = intval($request->input('day'));
+        $hour = intval($request->input('hour'));
+
+        $month = ($month < 10) ? '0'.$month : $month;
+        $day = ($day < 10) ? '0'.$day : $day;
+        $hour = ($hour < 10) ? '0'.$hour : $hour;
+
+        // 1. check service
+        $barberservice = BarbersService::select()
+            ->where('id', $service)
+            ->where('id_barber', $id)
+        ->first();
+
+        if(!$barberservice){
+            $array['error'] = 'Serviço inexistente!';
+            return $array;
+        } else {
+            $apDate = $year.'-'.$month.'-'.$day.' '.$hour.':00';
+
+            if(strtotime($apDate) <= 0){ 
+                $array['error'] = 'Data inválida!';
+                return $array;
+            }
+    
+            $apps = UserAppointment::select()
+                ->where('id_barber', $id)
+                ->where('ap_datetime', $apDate)
+            ->count();
+    
+            if($apps !== 0){
+                $array['error'] = 'Sem horários disponíveis!';
+                return $array;
+            }
+    
+            $weekday = date('w', strtotime($apDate));
+            $avail = BarbersAvailability::select()
+                ->where('id_barber', $id)
+                ->where('weekday', $weekday)
+            ->first();
+    
+            if(!$avail){
+                $array['error'] = 'O barbeiro não atende nesta data!';
+                return $array;
+            }
+    
+            $hours = explode(',', $avail['hours']);
+            if(in_array($hour.':00', $hours)){
+                $newAppointment = new UserAppointment();
+                $newAppointment->id_user = $this->loggedUser->id;
+                $newAppointment->id_barber = $id;
+                $newAppointment->id_service = $service;
+                $newAppointment->ap_datetime = $apDate;
+                $newAppointment->save();
+            } else {
+                $array['error'] = 'O barbeiro não atende nesta hora!';
+                return $array;
+            }
+        }
+                    
+        return $array;
+    }
+
+    public function search(Request $request)
+    {
+        $array = ['error'=>'', 'list'=>[]];
+
+        $q = $request->input('q');
+
+        if(!$q){
+            $array['error'] = 'Digite algo para buscar!';
+        } else {
+            $barbers = Barber::select()
+                ->where('name', 'LIKE', '%'.$q.'%')
+            ->get();
+
+            foreach ($barbers as $key => $value) {
+                $barbers[$key]['avatar'] = url('media/avatars/'.$barbers[$key]['avatar']);
+            }
+            $array['list'] = $barbers;
+        }
+
+        return $array;
+    }
 }
