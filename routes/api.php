@@ -29,4 +29,3 @@ Route::post('/barber/{id}/appointment', [BarberController::class, 'setAppointmen
 
 Route::get('/search', [BarberController::class, 'search']);
 
-//eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC8xMjcuMC4wLjE6ODAwMFwvYXBpXC9hdXRoXC9sb2dpbiIsImlhdCI6MTYwNjkzMzQyNiwibmJmIjoxNjA2OTMzNDI2LCJqdGkiOiJQZGNEM1VVWHlFZHM4d3NTIiwic3ViIjoxLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.7QNxhnVE_Pwpyuht1hTIRfqGHcR4M4FGKWQ8n4ywqgw

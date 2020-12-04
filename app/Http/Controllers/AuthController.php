@@ -123,7 +123,7 @@ class AuthController extends Controller
         # refresh token
         $token = auth()->refresh();
 
-        # fill array
+        # fill array to return data
         $info = auth()->user();
         $info['avatar'] = url('media/avatars/'.$info['avatar']);
         $array['data'] = $info;

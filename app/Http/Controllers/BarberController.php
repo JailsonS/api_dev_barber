@@ -366,6 +366,7 @@ class BarberController extends Controller
             foreach ($barbers as $key => $value) {
                 $barbers[$key]['avatar'] = url('media/avatars/'.$barbers[$key]['avatar']);
             }
+            
             $array['list'] = $barbers;
         }
 
