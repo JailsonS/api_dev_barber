@@ -1,3 +1,3 @@
 # ABOUT PROJECT
 
-### THIS AN EXAMPLE OF PROJECT API USING LARAVEL FRAMEWORK
+### This is an API developed using Laravel framework
